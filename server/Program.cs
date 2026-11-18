@@ -3,10 +3,12 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace Server
 {
-    // Server TCP minimale: accetta un client alla volta e risponde a ogni messaggio.
+    // SERVER TCP 
+    // minimale: accetta 1 client alla volta e risponde a ogni messaggio.
     class Program
     {
         const int PORTA = 5000;
@@ -15,13 +17,18 @@ namespace Server
         {
             TcpListener listener = new TcpListener(IPAddress.Loopback, PORTA);
             listener.Start();
-            Console.WriteLine("Server in ascolto sulla porta " + PORTA + "...");
+            Console.WriteLine("Server in ascolto sulla porta " + PORTA + ".");
 
             while (true)
             {
                 // Bloccante: attende che un client si connetta
                 using (TcpClient client = listener.AcceptTcpClient())
                 {
+                    Thread thread = new Thread(DoWork);
+                    thread.Start();
+                    Console.WriteLine( "Thread principale in esecuzione");
+                    
+
                     Console.WriteLine("Client connesso: " + client.Client.RemoteEndPoint);
 
                     using (NetworkStream stream = client.GetStream())
@@ -48,10 +55,15 @@ namespace Server
                             }
                         }
                     }
-
                     Console.WriteLine("Client disconnesso.");
                 }
             }
+        }
+
+        static void DoWork()
+        {
+            System.Console.WriteLine("Sono il thread che si occuperà di eseguire il lavoro");
+            
         }
     }
 }
